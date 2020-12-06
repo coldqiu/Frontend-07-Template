@@ -30,6 +30,7 @@
     <div class="color"></div>
 
     <script type="text/javascript">
+      // cSpell:ignore parttern
       let parttern = [0, 0, 0, 0, 0, 0, 0, 0, 0];
       // 1 为 O ; 2 为 X
       let dom = document.getElementsByClassName("list")[0];
@@ -68,7 +69,7 @@
         }
         parttern[index] = color; // 这下面几个步骤的顺序很重要
         if (check(parttern, color)) {
-          alert(color === 1 ? "O is winnter" : "X is winnter");
+          alert(color === 1 ? "O is winner" : "X is winner");
         }
 
         color = 3 - color;
@@ -89,7 +90,7 @@
           parttern[index] = color;
         }
         if (check(parttern, color)) {
-          alert(color === 1 ? "O is winnter" : "X is winnter");
+          alert(color === 1 ? "O is winner" : "X is winner");
         }
         color = 3 - color;
         render();
@@ -161,7 +162,6 @@
       }
       function bestChoice(parttern, color) {
         // 1 赢 0 平局 -1 输
-
         let p = willWin(parttern, color);
         if (p) {
           // 赢
