@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      .list {
+        width: 300px;
+        height: 300px;
+        font-size: 0;
+      }
+      .item {
+        display: inline-block;
+        vertical-align: middle;
+        width: 100px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+        border: 1px solid #333;
+        font-size: 60px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="list"></div>
+    <div class="color"></div>
+
+    <script type="text/javascript">
+      let parttern = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      // 1 为 O ; 2 为 X
+      let dom = document.getElementsByClassName("list")[0];
+      let colorDom = document.getElementsByClassName("color")[0];
+      let color = currentColor(parttern);
+      console.log("color", color);
+      function render() {
+        dom.innerHTML = "";
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            let item = document.createElement("div");
+            let type = parttern[i * 3 + j] === 1 ? "O" : parttern[i * 3 + j] === 2 ? "X" : "";
+            item.classList.add("item");
+            item.innerText = type;
+            item.addEventListener("click", function (e) {
+              userMove(j, i);
+            });
+            dom.appendChild(item);
+          }
+          let br = document.createElement("br");
+          dom.appendChild(br);
+        }
+        colorDom.innerText = (color === 1 ? "O" : color === 2 ? "X" : "") + "的回合";
+      }
+
+      function userMove(x, y) {
+        let index = y * 3 + x;
+        if (parttern[index]) {
+          if (partternFull()) {
+            alert("平局");
+            return;
+          } else {
+            alert("请走空白处");
+            return;
+          }
+        }
+        parttern[index] = color; // 这下面几个步骤的顺序很重要
+        if (check(parttern, color)) {
+          alert(color === 1 ? "O is winnter" : "X is winnter");
+        }
+
+        color = 3 - color;
+
+        render();
+        if (willWin(parttern, color)) {
+          console.log(color === 1 ? "O will win" : "X will win");
+        }
+        computerMove();
+        // console.log(bestChoice(parttern, color));
+      }
+
+      function computerMove() {
+        let choice = bestChoice(parttern, color);
+        console.log("choice", choice);
+        if (choice.point) {
+          let index = choice.point[1] * 3 + choice.point[0];
+          parttern[index] = color;
+        }
+        if (check(parttern, color)) {
+          alert(color === 1 ? "O is winnter" : "X is winnter");
+        }
+        color = 3 - color;
+        render();
+      }
+
+      function check(parttern, color) {
+        for (let j = 0; j < 3; j++) {
+          let win = true;
+          for (let i = 0; i < 3; i++) {
+            if (parttern[j * 3 + i] !== color) {
+              win = false;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+        for (let j = 0; j < 3; j++) {
+          let win = true;
+          for (let i = 0; i < 3; i++) {
+            if (parttern[i * 3 + j] !== color) {
+              win = false;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+        {
+          let win = true;
+          for (let j = 0; j < 3; j++) {
+            if (parttern[j * 3 + j] !== color) {
+              win = false;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+        {
+          let win = true;
+          for (let j = 0; j < 3; j++) {
+            if (parttern[j * 3 + (2 - j)] !== color) {
+              win = false;
+            }
+          }
+          if (win) {
+            return true;
+          }
+        }
+        return false;
+      }
+
+      function willWin(parttern, color) {
+        for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (parttern[i * 3 + j] !== 0) {
+              continue;
+            }
+            let list = clone(parttern);
+            list[i * 3 + j] = color;
+            if (check(list, color)) {
+              // console.log(color, " will win point", j, i);
+              return [j, i];
+            }
+          }
+        }
+        return null;
+      }
+      function bestChoice(parttern, color) {
+        // 1 赢 0 平局 -1 输
+
+        let p = willWin(parttern, color);
+        if (p) {
+          // 赢
+          // console.log("shy");
+          return {
+            point: p,
+            result: 1, // 这里单词写错了， 害我 烦了两天， 耐心看递归调用
+          };
+        }
+        let result = -2;
+        let point = null;
+        outer: for (let i = 0; i < 3; i++) {
+          for (let j = 0; j < 3; j++) {
+            if (parttern[i * 3 + j]) {
+              continue;
+            }
+            let tmp = clone(parttern);
+            tmp[i * 3 + j] = color;
+            let r = bestChoice(tmp, 3 - color).result;
+            if (-r > result) {
+              result = -r;
+              point = [j, i];
+            }
+            if (result == 1) {
+              // 胜负剪枝
+              break outer;
+            }
+          }
+        }
+
+        return {
+          point: point,
+          result: point ? result : 0,
+        };
+      }
+
+      function clone(parttern) {
+        // return parttern.slice(); // 每次执行都创建一个新的对象， 让费空间
+        return Object.create(parttern); // 只有一份数据（在原型对象上），节约空间
+      }
+      function currentColor(parttern) {
+        let num1 = {
+          count: 0,
+          title: 1,
+        };
+        let num2 = {
+          count: 0,
+          title: 2,
+        };
+        num1.count = parttern.filter((item) => item === 1).length;
+        num2.count = parttern.filter((item) => item === 2).length;
+        let min = Math.min(num1.count, num2.count);
+        if (min === num1.count) {
+          return num1.title;
+        } else {
+          return num2.title;
+        }
+      }
+      function partternFull() {
+        let len = parttern.filter((item) => item === 0);
+        console.log("len", len);
+        if (!len.length) {
+          return true;
+        }
+      }
+      render();
+      // console.log(bestChoice(parttern, color));
+    </script>
+  </body>
+</html>
