@@ -29,9 +29,12 @@
   <body>
     <button onclick="save()">save</button>
     <div id="wrap"></div>
+    <script type="text/javascript" src="./map.js"></script>
     <script type="text/javascript">
       // cSpell:ignore moveover
-      var map = localStorage.getItem("map") ? JSON.parse(localStorage.getItem("map")) : Array(10000).fill(0);
+      // var map = localStorage.getItem("map") ? JSON.parse(localStorage.getItem("map")) : Array(10000).fill(0);
+
+      var map = localStorage.getItem("map") ? JSON.parse(localStorage.getItem("map")) : defaultMap ? defaultMap : Array(10000).fill(0);
 
       let wrap = document.getElementById("wrap");
       for (let y = 0; y < 100; y++) {
