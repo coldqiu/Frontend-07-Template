@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Week 02</title>
+    <style>
+      #wrap {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 900px;
+        height: 900px;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .cell {
+        flex: 0 0 7px;
+        width: 7px;
+        height: 7px;
+        margin: 1px;
+        background: #fff;
+        /* background: rgba(0, 0, 0, 0.2); */
+      }
+      button {
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <button onclick="save()">save</button>
+    <div id="wrap"></div>
+    <script type="text/javascript">
+      // cSpell:ignore moveover
+      var map = localStorage.getItem("map") ? JSON.parse(localStorage.getItem("map")) : Array(10000).fill(0);
+
+      let wrap = document.getElementById("wrap");
+      for (let y = 0; y < 100; y++) {
+        for (let x = 0; x < 100; x++) {
+          let cell = document.createElement("div");
+          cell.classList.add("cell");
+          if (map[y * 100 + x] === 1) cell.style.backgroundColor = "black";
+          cell.addEventListener("mousemove", () => {
+            if (mousedown) {
+              if (clear) {
+                cell.style.backgroundColor = "";
+                map[y * 100 + x] = 0;
+              } else {
+                cell.style.backgroundColor = "black";
+                map[y * 100 + x] = 1;
+              }
+            }
+          });
+          wrap.appendChild(cell);
+        }
+      }
+
+      let mousedown = false;
+      let clear = false;
+      document.addEventListener("mousedown", (e) => {
+        mousedown = true;
+        clear = e.which === 3;
+      });
+      document.addEventListener("mouseup", () => (mousedown = false));
+      document.addEventListener("contextmenu", (e) => e.preventDefault());
+
+      function save() {
+        localStorage.setItem("map", JSON.stringify(map));
+      }
+
+      class Sorted {
+        constructor(data, compare) {
+          this.data = data.slice();
+          this.compare = compare || ((a, b) => a - b);
+        }
+
+        take() {
+          if (!this.data.length) {
+            return;
+          }
+          let min = this.data[0];
+          let minIndex = 0;
+
+          for (let i = 1; i < this.data.length; i++) {
+            if (this.compare(this.data[i], min) < 0) {
+              min = this.data[i];
+              minIndex = i;
+            }
+          }
+          // 技巧： 删除一个无序数组的某个元素
+          this.data[minIndex] = this.data[this.data.length - 1];
+          this.data.pop();
+          return min;
+        }
+
+        give(v) {
+          this.data.push(v);
+        }
+      }
+
+      async function findPath(map, start, end) {
+        let table = Object.create(map);
+        // var queue = [start];
+        let queue = new Sorted([start], (a, b) => distance(a) - distance(b));
+
+        function distance(point) {
+          return (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2;
+        }
+
+        async function insert(x, y, pre) {
+          if (x < 0 || x >= 100 || y < 0 || y >= 100) {
+            return;
+          }
+
+          if (table[y * 100 + x]) {
+            return;
+          }
+          table[y * 100 + x] = pre; // table里的节点存的是前一个节点
+          console.log(x, y);
+          console.log("pre", pre);
+
+          // table[y * 100 + x] = pre;
+          // await sleep(30);
+          wrap.children[y * 100 + x].style.backgroundColor = "lightgreen";
+          queue.give([x, y]);
+        }
+
+        while (queue.data.length) {
+          let [x, y] = queue.take();
+          if (x === end[0] && y === end[1]) {
+            // return true; // 找到end
+            // 从end 去找它的pre 一直找到start
+            let path = [];
+            while (x !== start[0] || y !== start[1]) {
+              path.push(map[y * 100 + x]);
+              [x, y] = table[y * 100 + x];
+              await sleep(30);
+              wrap.children[y * 100 + x].style.backgroundColor = "purple";
+            }
+            return path;
+          }
+          await insert(x, y + 1, [x, y]);
+          await insert(x, y - 1, [x, y]);
+          await insert(x - 1, y, [x, y]);
+          await insert(x + 1, y, [x, y]);
+
+          await insert(x + 1, y + 1, [x, y]);
+          await insert(x + 1, y - 1, [x, y]);
+          await insert(x - 1, y + 1, [x, y]);
+          await insert(x - 1, y - 1, [x, y]);
+        }
+        return false;
+      }
+      // 逻辑和 findPath相似只是顺序相反；
+      function findBestPre(map, end, start) {
+        let preTable = Object.create(map);
+        let preQueue = new Sorted([end], (a, b) => distance(a) - distance(b));
+      }
+
+      function sleep(t) {
+        return new Promise(function (resolve) {
+          setTimeout(resolve, t);
+        });
+      }
+      findPath(map, [0, 0], [40, 40]);
+      //
+    </script>
+  </body>
+</html>
