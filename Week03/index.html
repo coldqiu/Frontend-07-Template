@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LL算法构建AST|正则表达式</title>
+  </head>
+  <body>
+    <script>
+      // 词法分析器
+      var regexp = /([0-9\.]+)|([ \t]+)|([\r\t]+)|(\*)|(\/)|(\+)|(\-)/g;
+      var dictionary = ["Number", "Whitespace", "LineTerminator", "*", "/", "+", "-"];
+
+      function* tokenize(source) {
+        var result = null;
+        var lastIndex = regexp.lastIndex;
+        while (true) {
+          result = regexp.exec(source);
+          lastIndex = regexp.lastIndex;
+          //   console.log("regexp", regexp);
+          if (!result) break;
+
+          if (regexp.lastIndex - lastIndex > result[0].length) break;
+
+          let token = {
+            type: null,
+            value: null,
+          };
+
+          for (var i = 1; i <= dictionary.length; i++) {
+            if (result[i]) {
+              //   console.log("dictionary", dictionary[i - 1]);
+              token.type = dictionary[i - 1];
+            }
+          }
+          token.value = result[0];
+          //   console.log("result", result);
+          yield token;
+        }
+        yield {
+          type: "EOF",
+        };
+      }
+
+      //   tokenize("1024 + 10 * 25");
+      let source = [];
+      for (let token of tokenize("1024 / 10 * 25 + 12 - 5 * 2")) {
+        console.log("token", token);
+        if (token.type !== "Whitespace" && token.type !== "LineTerminator") {
+          source.push(token);
+        }
+      }
+
+      function Expression(tokens) {
+        if (source[0].type === "AdditiveExpress" && source[1] && source[1].type === "EOF") {
+          let node = {
+            type: "Expression",
+            children: [source.shift(), source.shift()],
+          };
+          source.unshift(node);
+          return node;
+        }
+        AdditiveExpress(source);
+        return Expression(source);
+      }
+
+      function AdditiveExpress(source) {
+        if (source[0].type === "MultiplicativeExpression") {
+          let node = {
+            type: "AdditiveExpress",
+            children: [source[0]],
+          };
+          source[0] = node;
+          return AdditiveExpress(source);
+        }
+
+        if (source[0].type === "AdditiveExpress" && source[1].type === "+") {
+          let node = {
+            type: "AdditiveExpress",
+            operator: "+",
+            children: [],
+          };
+          node.children.push(source.shift());
+          node.children.push(source.shift());
+          MultiplicativeExpression(source);
+          node.children.push(source.shift());
+          source.unshift(node);
+          return AdditiveExpress(source);
+        }
+
+        if (source[0].type === "AdditiveExpress" && source[1].type === "-") {
+          let node = {
+            type: "AdditiveExpress",
+            operator: "-",
+            children: [],
+          };
+          node.children.push(source.shift());
+          node.children.push(source.shift());
+          MultiplicativeExpression(source);
+          node.children.push(source.shift());
+          source.unshift(node);
+          return AdditiveExpress(source);
+        }
+        if (source[0].type === "AdditiveExpress") {
+          return source[0];
+        }
+        MultiplicativeExpression(source); // 第一次执行 处理 Number
+        console.log("AdditiveExpress(source)", AdditiveExpress(source));
+        return;
+
+        console.log("source", source);
+      }
+
+      function MultiplicativeExpression(source) {
+        if (source[0].type === "Number") {
+          let node = {
+            type: "MultiplicativeExpression",
+            children: [source[0]],
+          };
+          source[0] = node;
+          return MultiplicativeExpression(source);
+        }
+
+        if (source[0].type === "MultiplicativeExpression" && source[1].type === "*") {
+          let node = {
+            type: "MultiplicativeExpression",
+            operator: "*",
+            children: [],
+          };
+          node.children.push(source.shift());
+          node.children.push(source.shift());
+          node.children.push(source.shift());
+          source.unshift(node);
+          return MultiplicativeExpression(source);
+        }
+
+        if (source[0].type === "MultiplicativeExpression" && source[1].type === "/") {
+          let node = {
+            type: "MultiplicativeExpression",
+            operator: "/",
+            children: [],
+          };
+          node.children.push(source.shift());
+          node.children.push(source.shift());
+          node.children.push(source.shift());
+          source.unshift(node);
+          return MultiplicativeExpression(source);
+        }
+        if (source[0].type === "MultiplicativeExpression") {
+          return source[0];
+        }
+        // console.log("source", source);
+        return MultiplicativeExpression(source); // 理论这条语句是永远不执行的；
+      }
+      //   console.log("sss", MultiplicativeExpression(source));
+      Expression(source);
+    </script>
+  </body>
+</html>
