@@ -11,7 +11,7 @@
 ![page3](https://wx3.sinaimg.cn/mw690/006TmFq8ly1glukdpo94sj30u0140wkz.jpg)
 ![page4](./images/week03-4.jpg)
 
-*直接点链接是403,右键在新标签页打开*
+*直接点链接是403,复制地址在新标签页打开*
 
 page1: https://wx3.sinaimg.cn/mw690/006TmFq8ly1glukdqt7hoj30u0140tfd.jpg
 
