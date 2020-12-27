@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KMP字符串模式匹配</title>
+  </head>
+  <body>
+    <script>
+      // cSpell:ignore abcdabcdabcex
+      // cSpell:ignore aabaabaaacx
+      function kmp(source, pattern) {
+        // 计算table
+        let table = new Array(pattern.length).fill(0);
+        {
+          let i = 1,
+            j = 0;
+
+          while (i < pattern.length) {
+            if (pattern[i] === pattern[j]) {
+              ++i;
+              ++j;
+              table[i] = j;
+            } else {
+              if (j > 0) {
+                j = table[j];
+              } else {
+                ++i;
+              }
+            }
+          }
+        }
+        // console.log("table", table);
+        // abcdabce
+        // aabaaac
+        {
+          let i = 0,
+            j = 0;
+
+          while (i < source.length) {
+            //   debugger;
+            if (source[i] === pattern[j]) {
+              ++i;
+              ++j;
+            } else {
+              if (j > 0) {
+                j = table[j];
+              } else {
+                ++i;
+              }
+            }
+            if (j === pattern.length) {
+              return true;
+            }
+          }
+          return false;
+        }
+      }
+      //   console.log("abcdabce", kmp("", "abcdabce"));
+      //   console.log("aabaaac", kmp("", "aabaaac"));
+
+      //   console.log(kmp("Hello", "ll"));
+      console.log(kmp("abcdabcdabcex", "abcdabce"));
+      console.log(kmp("aabaabaaacx", "aabaaac"));
+      console.log(kmp("aabbc", "abc"));
+    </script>
+  </body>
+</html>
