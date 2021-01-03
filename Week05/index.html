@@ -7,7 +7,9 @@
   </head>
   <body>
     <script>
-      let callbacks = [];
+      // cSpell:ignore usedReactivties
+      let callbacks = new Map();
+      let usedReactivties = [];
       let object = {
         a: 1,
         b: 2,
@@ -20,19 +22,36 @@
       });
 
       function effect(callback) {
-        callbacks.push(callback);
+        debugger;
+        usedReactivties = [];
+        callback();
+        console.log(usedReactivties);
+        for (let reactivity of usedReactivties) {
+          // 处理多次 reactivity 多次注册
+          if (!callbacks.has(reactivity[0])) {
+            callbacks.set(reactivity[0], new Map());
+          }
+          if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
+            callbacks.get(reactivity[0]).set(reactivity[1], []);
+          }
+          callbacks.get(reactivity[0]).get(reactivity[1]).push(callback);
+        }
       }
 
       function reactive(object) {
         return new Proxy(object, {
           set(obj, prop, val) {
             obj[prop] = val;
-            for (let callback of callbacks) {
-              callback();
+            if (callbacks.get(obj).get(prop)) {
+              for (let callback of callbacks.get(obj).get(prop)) {
+                callback();
+              }
             }
+
             return obj[prop];
           },
           get(obj, prop) {
+            usedReactivties.push([obj, prop]);
             return obj[prop];
           },
         });
