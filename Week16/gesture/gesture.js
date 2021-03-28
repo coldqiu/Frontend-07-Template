@@ -129,6 +129,11 @@ export class Recognize {
     //   console.log("start", point.clientX, point.clientY);
     (context.startX = point.clientX), (context.startY = point.clientY);
 
+    this.dispatcher.dispatch("start", {
+      clientX: point.clientX,
+      clientY: point.clientY,
+    });
+
     context.points = [
       {
         t: Date.now(),

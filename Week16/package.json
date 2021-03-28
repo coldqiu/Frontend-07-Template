@@ -4,8 +4,7 @@
   "description": "1. `week01/` 代表第一周作业提交目录，以此类推。\r 2. 请在对应周的目录下新建或修改自己的代码作业。\r 2. 每周均有一个 `NOTE.md` 文档，你可以将自己当周的学习心得以及做题过程中的思考记录在该文档中。",
   "main": "main.js",
   "dependencies": {
-    "css": "^3.0.0",
-    "webpack-dev-server": "^3.11.2"
+    "css": "^3.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
@@ -13,7 +12,8 @@
     "@babel/preset-env": "^7.13.9",
     "babel-loader": "^8.2.2",
     "webpack": "^5.24.4",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
