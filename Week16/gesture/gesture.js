@@ -251,8 +251,20 @@ export class Recognize {
         clientY: point.clientY,
         isVertical: context.isVertical,
         isFlick: context.isFlick,
+        velocity: v,
       });
     }
+
+    // console.log("end");
+    this.dispatcher.dispatch("end", {
+      startX: context.startX,
+      startY: context.startY,
+      clientX: point.clientX,
+      clientY: point.clientY,
+      isVertical: context.isVertical,
+      isFlick: context.isFlick,
+      velocity: v,
+    });
   }
   cancel(point, context) {
     //   console.log("cancel", point.clientX, point.clientY);

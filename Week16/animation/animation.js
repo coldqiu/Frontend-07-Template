@@ -113,7 +113,7 @@ export class Animation {
     this.delay = delay;
   }
   receive(time) {
-    console.log("receiveTime time", time);
+    // console.log("receiveTime time", time);
     let range = this.endValue - this.startValue;
     let progress = this.timingFunction(time / this.duration);
 

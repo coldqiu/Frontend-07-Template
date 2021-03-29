@@ -54,7 +54,7 @@ export class Carousel extends Component {
       }
     });
 
-    this.root.addEventListener("panend", (event) => {
+    this.root.addEventListener("end", (event) => {
       console.log("panend event", event);
 
       timeline.reset();
@@ -65,6 +65,16 @@ export class Carousel extends Component {
       let current = position - (x - (x % 500)) / 500;
 
       let direction = Math.round((x % 500) / 500);
+
+      // flick
+      if (event.isFlick) {
+        // console.log("event.velocity", event.velocity);
+        if (event.velocity > 0) {
+          direction = Math.ceil((x % 500) / 500);
+        } else {
+          direction = Math.floor((x % 500) / 500);
+        }
+      }
 
       for (let offset of [-1, 0, 1]) {
         let pos = current + offset;
@@ -84,52 +94,15 @@ export class Carousel extends Component {
           )
         );
       }
+      position = position - (x - (x % 500)) / 500 - direction;
+      position = ((position % children.length) + children.length) % children.length;
     });
-
-    position = position - (x - (x % 500)) / 500 - direction;
-    position = ((pos % children.length) + children.length) % children.length;
-
-    // this.root.addEventListener("mousedown", (event) => {
-    //   let children = this.root.children;
-    //   let startX = event.clientX;
-
-    //   let move = (event) => {
-    //     let x = event.clientX - startX;
-
-    //     let current = position - (x - (x % 500)) / 500;
-
-    //     for (let offset of [-1, 0, 1]) {
-    //       let pos = current + offset;
-    //       pos = (pos + children.length) % children.length;
-
-    //       children[pos].style.transition = "none";
-    //       children[pos].style.transform = `translateX(${-pos * 500 + offset * 500 + (x % 500)}px)`;
-    //     }
-    //   };
-
-    //   let up = (event) => {
-    //     let x = event.clientX - startX;
-    //     position = position - Math.round(x / 500);
-
-    //     for (let offset of [0, -Math.sign(Math.round(x / 500) - x + 250 * Math.sign(x))]) {
-    //       let pos = position + offset;
-    //       pos = (pos + children.length) % children.length;
-
-    //       children[pos].style.transition = "";
-    //       children[pos].style.transform = `translateX(${-pos * 500 + offset * 500}px)`;
-    //     }
-    //     document.removeEventListener("mousemove", move);
-    //     document.removeEventListener("mouseup", up);
-    //   };
-
-    //   document.addEventListener("mousemove", move);
-    //   document.addEventListener("mouseup", up);
-    // });
 
     // auto play
     // let currentIndex = 0;
 
     let nextPicture = () => {
+      console.log("nextPicture");
       let children = this.root.children;
       let nextIndex = (position + 1) % children.length;
 
